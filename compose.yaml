@@ -1,0 +1,6 @@
+services:
+  devops-tool:
+    build: .
+    image: devops-tool
+    entrypoint: ["./app.sh"]
+    command: ["help"]

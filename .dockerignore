@@ -1,0 +1,9 @@
+.git
+*.log
+logs/
+tmp/
+.DS_Store
+*.tmp
+tests/
+scripts/
+.github/
