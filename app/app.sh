@@ -43,6 +43,7 @@ cmd_check_host() {
     echo "=== Host Check: $host ==="
 
     if command -v getent >/dev/null 2>&1; then
+        local resolved
         resolved=$(getent hosts "$host" 2>/dev/null | awk '{print $1}')
         if [ -n "$resolved" ]; then
             echo "Resolved: $resolved"
