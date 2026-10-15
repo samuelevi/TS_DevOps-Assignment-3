@@ -13,7 +13,11 @@ echo "=== Lint Check ==="
 for f in app/app.sh scripts/lint.sh scripts/build.sh tests/test.sh; do
     if [[ -f "$f" ]]; then
         pass "File exists: $f"
-        bash -n "$f" >/dev/null 2>&1 && pass "Syntax OK: $f" || fail "Syntax error: $f"
+        if bash -n "$f" >/dev/null 2>&1; then
+            pass "Syntax OK: $f"
+        else
+            fail "Syntax error: $f"
+        fi
     else
         fail "Missing file: $f"
     fi
