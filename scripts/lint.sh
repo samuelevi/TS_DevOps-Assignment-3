@@ -24,14 +24,15 @@ for f in app/app.sh scripts/lint.sh scripts/build.sh tests/test.sh; do
     fi
 done
 
-# shellcheck might not be installed locally but CI has it
+
 if command -v shellcheck >/dev/null 2>&1; then
     for f in app/app.sh scripts/lint.sh scripts/build.sh tests/test.sh; do
         if [[ -f "$f" ]]; then
-            if shellcheck "$f" >/dev/null 2>&1; then
+            if out=$(shellcheck "$f" 2>&1); then
                 pass "ShellCheck: $f"
             else
                 fail "ShellCheck issues: $f"
+                echo "$out"
             fi
         fi
     done
