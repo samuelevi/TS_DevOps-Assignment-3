@@ -45,7 +45,8 @@ do_check_host() {
     local host="$1"
     echo "=== Host Check: $host ==="
 
-   
+    local reachable=0
+
     if command -v getent >/dev/null 2>&1; then
         local resolved
         resolved=$(getent hosts "$host" 2>/dev/null | awk '{print $1}')
@@ -56,10 +57,10 @@ do_check_host() {
         fi
     fi
 
-   
     if command -v ping >/dev/null 2>&1; then
         if ping -c 2 -W 3 "$host" >/dev/null 2>&1; then
             echo "Ping: OK"
+            reachable=1
         else
             echo "Ping: FAILED"
         fi
@@ -69,6 +70,10 @@ do_check_host() {
         echo ""
         echo "=== Network Interfaces ==="
         ip -brief addr show 2>/dev/null
+    fi
+
+    if [ "$reachable" -eq 0 ]; then
+        return 1
     fi
 }
 
