@@ -99,7 +99,6 @@ do_check_port() {
 
     echo "=== TCP Check: $host:$port ==="
 
-    
     if (echo >/dev/tcp/"$host"/"$port") 2>/dev/null; then
         echo "Connection to $host:$port: SUCCESS"
     elif command -v nc >/dev/null 2>&1; then
@@ -112,8 +111,6 @@ do_check_port() {
         echo "Connection to $host:$port: FAILED"
     fi
 }
-
-
 
 if [ $# -lt 1 ]; then
     echo "Error: no command provided" >&2
@@ -135,5 +132,3 @@ case "$cmd" in
         exit 2
         ;;
 esac
-
-echo "broken
