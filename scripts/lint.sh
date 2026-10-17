@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
+# checks that all scripts exist, have valid syntax, and pass shellcheck
 set -u
 
-PASS=0
-FAIL=0
-EXIT_CODE=0
+pass_count=0
+fail_count=0
+exit_code=0
 
-pass() { echo "LINT PASS: $1"; PASS=$((PASS+1)); }
-fail() { echo "LINT FAIL: $1"; FAIL=$((FAIL+1)); EXIT_CODE=1; }
+pass() { echo "LINT PASS: $1"; pass_count=$((pass_count + 1)); }
+fail() { echo "LINT FAIL: $1"; fail_count=$((fail_count + 1)); exit_code=1; }
 
 echo "=== Lint Check ==="
 
@@ -19,24 +20,25 @@ for f in app/app.sh scripts/lint.sh scripts/build.sh tests/test.sh; do
             fail "Syntax error: $f"
         fi
     else
-        fail "Missing file: $f"
+        fail "Missing: $f"
     fi
 done
 
+# shellcheck might not be installed locally but CI has it
 if command -v shellcheck >/dev/null 2>&1; then
     for f in app/app.sh scripts/lint.sh scripts/build.sh tests/test.sh; do
         if [[ -f "$f" ]]; then
             if shellcheck "$f" >/dev/null 2>&1; then
                 pass "ShellCheck: $f"
             else
-                fail "ShellCheck warnings: $f"
+                fail "ShellCheck issues: $f"
             fi
         fi
     done
 fi
 
 echo ""
-echo "Lint passed: $PASS"
-echo "Lint failed: $FAIL"
+echo "Passed: $pass_count"
+echo "Failed: $fail_count"
 
-exit $EXIT_CODE
+exit "$exit_code"

@@ -1,47 +1,48 @@
 #!/usr/bin/env bash
+# builds the docker image and runs a few quick smoke tests
 set -u
 
-IMAGE="devops-tool"
+IMG="devops-tool"
 
 echo "=== Building Docker Image ==="
 
 if ! command -v docker >/dev/null 2>&1; then
-    echo "Error: Docker is not installed." >&2
+    echo "docker not found, please install it" >&2
     exit 1
 fi
 
-if docker build -t "$IMAGE" . ; then
-    echo "Build successful: $IMAGE"
+if docker build -t "$IMG" .; then
+    echo "Built image: $IMG"
 else
-    echo "Build failed." >&2
+    echo "Build failed!" >&2
     exit 1
 fi
 
 echo ""
-echo "=== Running Smoke Tests ==="
+echo "=== Smoke Tests ==="
 
-echo "Test: help command"
-if docker run --rm "$IMAGE" help >/dev/null 2>&1; then
-    echo "PASS: help"
+echo "-> help command"
+if docker run --rm "$IMG" help >/dev/null 2>&1; then
+    echo "   PASS"
 else
-    echo "FAIL: help"
+    echo "   FAIL"
     exit 1
 fi
 
-echo "Test: system-info command"
-if docker run --rm "$IMAGE" system-info >/dev/null 2>&1; then
-    echo "PASS: system-info"
+echo "-> system-info command"
+if docker run --rm "$IMG" system-info >/dev/null 2>&1; then
+    echo "   PASS"
 else
-    echo "FAIL: system-info"
+    echo "   FAIL"
     exit 1
 fi
 
-echo "Test: invalid command (should fail)"
-if docker run --rm "$IMAGE" invalid-command >/dev/null 2>&1; then
-    echo "FAIL: invalid command should return non-zero"
+echo "-> invalid command (expect failure)"
+if docker run --rm "$IMG" bad-command >/dev/null 2>&1; then
+    echo "   FAIL (should have errored)"
     exit 1
 else
-    echo "PASS: invalid command returns non-zero"
+    echo "   PASS"
 fi
 
 echo ""
