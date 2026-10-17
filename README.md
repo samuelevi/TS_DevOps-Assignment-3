@@ -1,28 +1,26 @@
-# Assignment 3 - CI/CD with GitHub Actions
+## Assignment 3 - CI/CD with GitHub Actions
 
-A Bash diagnostic app with a CI pipeline that lints, tests, and builds a Docker image automatically on every push and pull request. No cloud deployment -- everything runs locally or in GitHub Actions.
+Bash tool that shows system info, checks hosts and ports. Has a CI pipeline that lints, tests, and builds a Docker image on every push/PR.
 
-## Setup
-
-Clone the repo and make scripts executable:
+## Getting Started
 
 ```bash
-git clone <repository-url>
+git clone <repo-url>
 cd assignment-3
-chmod +x app/app.sh scripts/*.sh tests/*.sh grade.sh
+chmod +x app/app.sh scripts/*.sh tests/*.sh
 ```
 
-To build the Docker image locally:
+To build with Docker:
 
 ```bash
 docker build -t devops-tool .
 ```
 
-You also need a GitHub repo with Actions enabled for the CI pipeline to run.
+You need GitHub Actions enabled on the repo for CI to work.
 
-## Usage
+## How to Use
 
-### Running locally
+### Locally
 
 ```bash
 ./app/app.sh help
@@ -31,7 +29,7 @@ You also need a GitHub repo with Actions enabled for the CI pipeline to run.
 ./app/app.sh check-port google.com 443
 ```
 
-### Running with Docker
+### With Docker
 
 ```bash
 docker run --rm devops-tool help
@@ -39,67 +37,55 @@ docker run --rm devops-tool system-info
 docker run --rm devops-tool check-host google.com
 ```
 
-**Commands:**
-- `system-info` -- hostname, user, OS, kernel, uptime, CPU, memory
-- `check-host <host>` -- DNS resolution + ping + network interfaces
-- `check-port <host> <port>` -- validates the port and checks TCP connectivity
-- `help` -- shows usage
+### Commands
 
-**Exit codes:** `0` for success, `1` for runtime failures, `2` for bad input (unknown command, missing args, invalid port, etc).
+- `system-info` - shows hostname, user, OS, kernel, uptime, CPU, and memory
+- `check-host <host>` - resolves DNS, pings the host, shows network interfaces
+- `check-port <host> <port>` - validates the port number and tests TCP connectivity
+- `help` - prints usage info
+
+### Exit codes
+
+- `0` = success
+- `1` = runtime error
+- `2` = bad input (wrong command, missing args, invalid port, etc)
 
 ## CI Pipeline
 
-The workflow at `.github/workflows/ci.yml` triggers on push and pull_request. It has three jobs that run in order:
+Workflow is at `.github/workflows/ci.yml`. Triggers on push and pull_request.
 
-1. **validate** -- runs `scripts/lint.sh` (checks files exist, validates bash syntax)
-2. **test** -- runs `tests/test.sh` (depends on validate passing)
-3. **docker** -- runs `scripts/build.sh` which builds the image and does smoke tests (depends on test passing)
+Three jobs run in sequence:
 
-A branch was created with a deliberate syntax error to show the pipeline catching failures, then fixed in a follow-up commit.
+1. **validate** - runs `scripts/lint.sh` (file existence + bash syntax + shellcheck)
+2. **test** - runs `tests/test.sh` (needs validate to pass first)
+3. **docker** - runs `scripts/build.sh` to build the image and do smoke tests (needs test to pass first)
 
-## Testing
+I created a branch with a deliberate syntax error to show the pipeline catching it, then fixed it in a follow-up commit.
 
-Run the test suite:
-
-```bash
-./tests/test.sh
-```
-
-This covers help output, system-info output, invalid/missing commands, missing host argument, non-numeric ports, out-of-range ports, and missing arguments for check-port. 10+ test cases total.
-
-Run the linter:
+## Running Tests
 
 ```bash
-./scripts/lint.sh
-```
-
-Run the Docker build + smoke tests:
-
-```bash
+./tests/test.sh   
+./scripts/lint.sh 
 ./scripts/build.sh
+./grade.sh        
 ```
 
-Run the full grader:
-
-```bash
-./grade.sh
-```
-
-The grader validates file structure, script permissions, bash syntax, CI workflow configuration (triggers, job dependencies), app behavior with valid and invalid inputs, lint passing, Docker build + smoke tests, and student test suite passing.
+The test suite covers: help output, system-info output, invalid commands, missing commands, missing arguments, non-numeric ports, and out-of-range ports. 12 test cases.
 
 ## Project Structure
 
 ```
 assignment-3/
 ├── app/
-│   └── app.sh
+│   └── app.sh           # the main tool
 ├── scripts/
-│   ├── lint.sh
-│   └── build.sh
+│   ├── lint.sh          # linter
+│   └── build.sh         # docker build + smoke tests
 ├── tests/
-│   └── test.sh
+│   └── test.sh          # test suite
 ├── .github/workflows/
-│   └── ci.yml
+│   └── ci.yml           # CI pipeline
 ├── Dockerfile
 ├── compose.yaml
 ├── .dockerignore
@@ -107,11 +93,9 @@ assignment-3/
 └── README.md
 ```
 
-## Assumptions
+## Notes
 
-- Docker is installed and running
-- GitHub Actions is enabled on the repo
-- Designed for Linux (Alpine in Docker, Ubuntu in CI)
-- `.dockerignore` excludes tests, scripts, and .github from the image -- only `app/app.sh` gets copied in
-- TCP port check uses bash `/dev/tcp` with `nc` as a fallback
-- No hardcoded machine-specific values
+- Docker needs to be installed and running for the build step
+- The app is designed for Linux (Alpine in Docker, Ubuntu in CI)
+- Only `app/app.sh` gets copied into the Docker image (see `.dockerignore`)
+- TCP port check tries bash `/dev/tcp` first, falls back to `nc`
